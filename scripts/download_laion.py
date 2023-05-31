@@ -51,6 +51,14 @@ def get_parser(**parser_kwargs):
         help="csv of words with AND logic, ex \"photo,man,dog\"",
     ),
     parser.add_argument(
+        "--exclude_text",
+        type=str,
+        const=True,
+        nargs="?",
+        default=None,
+        help="csv of excluded words with AND logic, ex \"art,woman,cat\"",
+    ),
+    parser.add_argument(
         "--out_dir",
         type=str,
         nargs="?",
@@ -294,6 +302,10 @@ def query_parquet(df: pd.DataFrame, opt):
     if opt.search_text:
         for word in opt.search_text.split(","):
             matches = matches[matches[opt.column].str.contains(word, case=False)]
+
+    if opt.exclude_text:
+        for word in opt.exclude_text.split(","):
+            matches = matches[~matches[opt.column].str.contains(word, case=False)]
 
     matches = matches[~matches["URL"].str.contains("dreamstime.com", case=False)] # watermarks
     matches = matches[~matches["URL"].str.contains("alamy.com", case=False)] # watermarks
